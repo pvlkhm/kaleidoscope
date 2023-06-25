@@ -1,0 +1,54 @@
+use crate::lexer::*;
+use crate::parser::*;
+
+grammar<'a>;
+
+pub ASTFile: ASTFile = {
+    <fns: ASTFn*> => ASTFile { fns: fns }
+};
+
+pub ASTFn: ASTFn = {
+    "fn" <name: ASTIdentifier> "(" <args: Comma<ASTIdentifier>> ")" <expr: ASTExpr> => ASTFn {
+        decl: ASTFnDecl { name: name, args: args },
+        body: expr
+    }
+};
+
+pub ASTIdentifier: ASTIdentifier = {
+    "id" => ASTIdentifier { name: <>.as_string() }
+};
+
+pub ASTExpr: ASTExpr = {
+    "num" => ASTExpr::Literal(<>.as_f64()),
+    // <expr1: ASTExpr> <op: "op"> <expr2: ASTExpr> => ASTExpr::Op(op, Box::new(expr1), Box::new(exrp2)),
+    <fn_name: ASTIdentifier> "(" <fn_args: Comma<ASTExpr>> ")" => ASTExpr::FnCall(ASTFnCall {
+        name: fn_name,
+        args: fn_args
+    }),
+    ASTIdentifier => ASTExpr::Var(<>)
+}
+
+Comma<T>: Vec<T> = {
+    <mut v:(<T> ",")*> <e:T?> => match e {
+        None => v,
+        Some(e) => {
+            v.push(e);
+            v
+        }
+    }
+};
+
+extern {
+    type Location = usize;
+    type Error    = usize;
+
+    enum Token<'a> {
+        "fn"    => Token::Fn,
+        "("     => Token::OpenPar,
+        ")"     => Token::ClosePar,
+        ","     => Token::Comma,
+        "op"    => Token::Operation(_),
+        "num"   => Token::Num(_),
+        "id"    => Token::Identifier(_)
+    }
+}
