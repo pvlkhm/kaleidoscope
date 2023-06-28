@@ -19,13 +19,24 @@ pub ASTIdentifier: ASTIdentifier = {
 };
 
 pub ASTExpr: ASTExpr = {
+    <expr1: ASTExpr> "+" <expr2: SubExpr> => ASTExpr::Op(Opcode::Add, Box::new(expr1), Box::new(expr2)),
+    <expr1: ASTExpr> "-" <expr2: SubExpr> => ASTExpr::Op(Opcode::Sub, Box::new(expr1), Box::new(expr2)),
+    SubExpr => <>
+}
+
+pub SubExpr: ASTExpr = {
+    <expr1: SubExpr> "*" <expr2: SubSubExpr> => ASTExpr::Op(Opcode::Mul, Box::new(expr1), Box::new(expr2)),
+    SubSubExpr => <>
+}
+
+pub SubSubExpr: ASTExpr = {
     "num" => ASTExpr::Literal(<>.as_f64()),
-    // <expr1: ASTExpr> <op: "op"> <expr2: ASTExpr> => ASTExpr::Op(op, Box::new(expr1), Box::new(exrp2)),
     <fn_name: ASTIdentifier> "(" <fn_args: Comma<ASTExpr>> ")" => ASTExpr::FnCall(ASTFnCall {
         name: fn_name,
         args: fn_args
     }),
-    ASTIdentifier => ASTExpr::Var(<>)
+    ASTIdentifier => ASTExpr::Var(<>),
+    "(" <expr: ASTExpr> ")" => expr
 }
 
 Comma<T>: Vec<T> = {
@@ -47,7 +58,9 @@ extern {
         "("     => Token::OpenPar,
         ")"     => Token::ClosePar,
         ","     => Token::Comma,
-        "op"    => Token::Operation(_),
+        "+"     => Token::Operation(Opcode::Add),
+        "-"     => Token::Operation(Opcode::Sub),
+        "*"     => Token::Operation(Opcode::Mul),
         "num"   => Token::Num(_),
         "id"    => Token::Identifier(_)
     }

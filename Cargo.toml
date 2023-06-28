@@ -10,6 +10,7 @@ regex        = "1.8.4"
 regex-macro  = "0.2.0"
 lalrpop      = "0.20.0"
 lalrpop-util = "0.20.0"
+clap         = { version = "4.3.9", features = ["derive"] }
 
 [build-dependencies]
 lalrpop      = "0.20.0"

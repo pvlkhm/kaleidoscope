@@ -18,16 +18,16 @@ pub enum Token<'a> {
 }
 
 impl<'a> Token<'a> {
-    pub fn as_f64(&self) -> f64 {
+    pub fn as_f64(self) -> f64 {
         match self {
-            Token::Num(n) => *n,
+            Token::Num(n) => n,
             _ => panic!("panic")
         }
     }
 
-    pub fn as_string(&self) -> String {
+    pub fn as_string(self) -> String {
         match self {
-            Token::Identifier(str) => String::from(*str),
+            Token::Identifier(str) => String::from(str),
             _ => panic!("panic")
         }
     }
