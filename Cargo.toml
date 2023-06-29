@@ -11,6 +11,7 @@ regex-macro  = "0.2.0"
 lalrpop      = "0.20.0"
 lalrpop-util = "0.20.0"
 clap         = { version = "4.3.9", features = ["derive"] }
+inkwell      = { version = "0.2.0", features = ["llvm15-0"] }
 
 [build-dependencies]
 lalrpop      = "0.20.0"

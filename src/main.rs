@@ -54,8 +54,14 @@ fn main() -> io::Result<()> {
 
                     stdin.read_line(&mut input)?;
                 } else {
-                    println!("{:?}", ast);
-                    stdout.flush()?;
+                    if args.parser {
+                        println!("{:?}", ast.unwrap());
+                        stdout.flush()?;
+                    } else {
+                        for fun in ast.unwrap().fns {
+                            println!("{:?}", fun);
+                        }
+                    }
 
                     break;
                 }
