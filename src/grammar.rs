@@ -1,5 +1,8 @@
 // auto-generated: "lalrpop 0.20.0"
-// sha3: ee582767a9a1a3f8d84bf226efb9108be8258dd8adc13ab3d84328d0e87c9730
+// sha3: 6025909703945171d3fb52a36a2bcd42ad4fc1abdc8e496dd47f3f0c1875c864
+#![allow(unused_macros)]
+#![allow(unused_imports)]
+#![allow(dead_code)]
 use crate::lexer::*;
 use crate::parser::*;
 #[allow(unused_extern_crates)]

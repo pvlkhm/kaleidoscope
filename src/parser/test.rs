@@ -1,5 +1,8 @@
-use crate::lexer::*;
+#![allow(unused_macros)]
+#![allow(unused_imports)]
+#![allow(dead_code)]
 
+use crate::lexer::*;
 
 use crate::grammar::ASTFileParser;
 

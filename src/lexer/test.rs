@@ -1,3 +1,7 @@
+#![allow(unused_macros)]
+#![allow(unused_imports)]
+#![allow(dead_code)]
+
 use super::*;
 
 macro_rules! test_lexer_u {
