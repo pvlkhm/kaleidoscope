@@ -3,10 +3,11 @@ mod parser;
 mod grammar;
 
 use std::io::{self, Write};
+use std::process::exit;
 use crate::grammar::ASTFileParser;
 use crate::parser::*;
 use inkwell::types::BasicMetadataTypeEnum;
-use inkwell::values::{BasicValueEnum, FunctionValue};
+use inkwell::values::{BasicMetadataValueEnum, BasicValueEnum, FunctionValue};
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -42,6 +43,9 @@ fn main() -> io::Result<()> {
         ty: ctx.f64_type()
     };
 
+    // Interpreter of JIT here
+    let execution_engine = ctx.module.create_interpreter_execution_engine().unwrap();
+
     loop {
         print!("> ");
         stdout.flush()?;
@@ -49,7 +53,16 @@ fn main() -> io::Result<()> {
 
         stdin.read_line(&mut input)?;
 
-        if args.lexer { // Lexer mode
+        if input.trim() == "exit" { // Exit
+            exit(0)
+        } else if input.trim() == "print" { // only LLVM Context
+            ctx.module.print_to_stderr();
+        } else if input.trim() == "exec" { // only fn main()
+            unsafe {
+                let res = execution_engine.run_function(ctx.module.get_function("main").unwrap(), &[]);
+                println!("{:?}", res.as_float(&ctx.ty));
+            }
+        } else if args.lexer { // Lexer mode
             let lx = lexer::Lexer::from_str(input.as_str());
 
             let mut v: Vec<lexer::Token> = vec![];
@@ -119,7 +132,15 @@ impl<'a> parser::ASTExpr {
                 lexer::Opcode::Sub => BasicValueEnum::FloatValue(ctx.builder.build_float_sub(num1.codegen(&ctx, args, fun).into_float_value(), num2.codegen(&ctx, args, fun).into_float_value(), "tmp")),
                 lexer::Opcode::Mul => BasicValueEnum::FloatValue(ctx.builder.build_float_mul(num1.codegen(&ctx, args, fun).into_float_value(), num2.codegen(&ctx, args, fun).into_float_value(), "tmp")),
             },
-            Self::FnCall(fn_name)     => panic!("call")
+            Self::FnCall(fn_name)     => {
+                let arg_calc: Vec<BasicMetadataValueEnum> = fn_name.args.iter().map(|arg| BasicMetadataValueEnum::from(arg.codegen(ctx, args, fun))).collect();
+
+                ctx.builder.build_call(
+                    ctx.module.get_function(fn_name.name.name.as_str()).unwrap(),
+                    &arg_calc,
+                    fn_name.name.name.as_str()
+                ).try_as_basic_value().unwrap_left()
+            }
         }
     }
 }
